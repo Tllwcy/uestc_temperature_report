@@ -10,6 +10,7 @@ import (
 )
 
 var cookieStr string
+var successNumber int
 
 type reportMessage struct {
 	HealthCondition             string `json:"healthCondition"`
@@ -29,13 +30,14 @@ func main() {
 	for i, cookie := range cookies {
 		log.Printf("准备为第%d位学生上报\n", i+1)
 		checkReport(cookie, i+1)
-		log.Printf("----------分割线----------\n")
+		log.Printf("-----------------------\n")
 	}
 	log.Printf("---------------上报完成--------------\n")
+	log.Printf("成功上报%d位同学的体温\n", successNumber)
 }
 
 func reportFault(id int) {
-	log.Printf("第%d位同学签到失败\n  ×××××××××××××××", id)
+	log.Printf("第%d位同学上报失败\n", id)
 }
 
 // check if it had report
@@ -136,5 +138,6 @@ func DoReport(cookie string, id int) {
 	request.Header.Add("cookie", cookie)
 	request.Header.Add("Referer", "https://servicewechat.com/wx521c0c16b77041a0/28/page-frame.html")
 	http.DefaultClient.Do(request)
-	log.Printf("第%d位同学签到成功\n  √√√√√√√√√√√√√√√", id)
+	log.Printf("第%d位同学签到成功\n", id)
+	successNumber++
 }
