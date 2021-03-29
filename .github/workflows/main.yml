@@ -19,6 +19,3 @@ jobs:
 
     - name: Run Main
       run: go run main.go -cookie=${{ secrets.COOKIE }}
-
-    - name: Test
-      run: go test -v ./...
