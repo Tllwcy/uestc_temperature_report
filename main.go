@@ -45,6 +45,7 @@ func checkReport(cookie string, id int) {
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		log.Printf("NewRequest error: %v\n", err)
+		reportFault(id)
 		return
 	}
 	request.Header.Add("content-type", "application/json")
@@ -60,29 +61,34 @@ func checkReport(cookie string, id int) {
 	response, err := client.Do(request)
 	if err != nil {
 		log.Printf("client.Do(request) error: %v\n", err)
+		reportFault(id)
 		return
 	}
 	defer response.Body.Close()
 	context, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		log.Printf("ioutil.ReadAll(response.Body) error: %v\n", err)
+		reportFault(id)
 		return
 	}
 	responseData := make(map[string]interface{})
 	err = json.Unmarshal(context, &responseData)
 	if err != nil {
 		log.Printf("json.Unmarshal(context, response) error: %v\n", err)
+		reportFault(id)
 		return
 	}
 	data := responseData["data"]
 	v, ok := data.(map[string]interface{})
 	if !ok {
 		log.Printf("type assert error\n")
+		reportFault(id)
 		return
 	}
 	isCheck, ok := (v["appliedTimes"]).(float64)
 	if !ok {
 		log.Printf("type assert error\n")
+		reportFault(id)
 		return
 	}
 	if isCheck == 0 {
@@ -90,8 +96,11 @@ func checkReport(cookie string, id int) {
 		DoReport(cookie, id)
 	} else if isCheck == 1 {
 		log.Printf("第%d位同学已经上报过了\n", id)
+		reportFault(id)
+		return
 	} else {
 		log.Printf("response data has been changed\n")
+		reportFault(id)
 		return
 	}
 
@@ -109,6 +118,7 @@ func DoReport(cookie string, id int) {
 	jsons, err := json.Marshal(oneReportMessage)
 	if err != nil {
 		log.Printf("json.Marshal error, err: %v\n", err)
+		reportFault(id)
 		return
 	}
 	result := string(jsons)
@@ -125,22 +135,6 @@ func DoReport(cookie string, id int) {
 	request.Header.Add("charset", "utf-8")
 	request.Header.Add("cookie", cookie)
 	request.Header.Add("Referer", "https://servicewechat.com/wx521c0c16b77041a0/28/page-frame.html")
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		log.Printf("call API error, err: %v\n", err)
-		return
-	}
-	body, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll error, err: %v\n", err)
-		return
-	}
+	http.DefaultClient.Do(request)
 	log.Printf("第%d位同学签到成功\n  √√√√√√√√√√√√√√√", id)
-	log.Println(string(body))
-	/*
-		1.success:
-			log "doReport success"
-		2.fault:
-			log "doReport default"
-	*/
 }
