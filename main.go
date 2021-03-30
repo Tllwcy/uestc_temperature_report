@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var cookieStr string
@@ -28,9 +29,10 @@ func main() {
 	flag.Parse()
 	cookies := strings.Split(cookieStr, "#")
 	for i, cookie := range cookies {
-		log.Printf("准备为第%d位学生上报\n", i+1)
-		checkReport(cookie, i+1)
 		log.Printf("-----------------------\n")
+		log.Printf("准备为第%d位学生上报\n", i+1)
+		time.Sleep(3 * time.Second)
+		checkReport(cookie, i+1)
 	}
 	log.Printf("---------------上报完成--------------\n")
 	log.Printf("成功上报%d位同学的体温\n", successNumber)
@@ -137,7 +139,37 @@ func DoReport(cookie string, id int) {
 	request.Header.Add("charset", "utf-8")
 	request.Header.Add("cookie", cookie)
 	request.Header.Add("Referer", "https://servicewechat.com/wx521c0c16b77041a0/28/page-frame.html")
-	http.DefaultClient.Do(request)
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		log.Printf("request error, err: %v\n", err)
+	}
+	defer response.Body.Close()
+	context, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		log.Printf("ioutil.ReadAll(response.Body) error: %v\n", err)
+		reportFault(id)
+		return
+	}
+	responseData := make(map[string]interface{})
+	err = json.Unmarshal(context, &responseData)
+	if err != nil {
+		log.Printf("json.Unmarshal(context, response) error: %v\n", err)
+		reportFault(id)
+		return
+	}
+	v, ok := responseData["status"]
+	if !ok {
+		log.Printf("responseData data form had been changed, error: %v\n", err)
+		reportFault(id)
+		return
+	}
+	status := v.(bool)
+	if status == false {
+		log.Printf("status is false, student has report\n")
+		reportFault(id)
+		return
+	}
+
 	log.Printf("第%d位同学签到成功\n", id)
 	successNumber++
 }
