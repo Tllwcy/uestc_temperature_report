@@ -27,6 +27,7 @@ func init() {
 
 func main() {
 	flag.Parse()
+	time.FixedZone("CST", 8*3600)
 	cookies := strings.Split(cookieStr, "#")
 	for i, cookie := range cookies {
 		log.Printf("-----------------------\n")
