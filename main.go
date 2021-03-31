@@ -171,6 +171,6 @@ func DoReport(cookie string, id int) {
 		return
 	}
 
-	log.Printf("第%d位同学签到成功\n", id)
+	log.Printf("第%d位同学上报成功\n", id)
 	successNumber++
 }
