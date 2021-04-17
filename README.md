@@ -36,7 +36,7 @@
 1. Fork仓库
    + 点击右上角的`Fork`，将仓库Fork到自己的账号下
 2. 获取Cookie
-   + 推荐采用客户端抓包的方式获取，使用Wireshark或Charles等抓包工具，获取cookie
+   + 推荐采用微信PC客户端抓包的方式获取，使用Wireshark或Charles等抓包工具，获取小程序"uestc学生情况报送“登陆时所用的cookie
 3. 添加 Cookie 至 Secrets
    + 回到自己的项目页面，依次点击`Settings`-->`Secrets`-->`New secret`
    + `Name`中填入`COOKIE`，将抓包到的`Cookie`粘贴到`Value`中，点击`Add secret`添加
